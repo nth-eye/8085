@@ -1,0 +1,5 @@
+.vscode
+build
+test
+CMakeLists.txt.in
+example_bubble_sort_*
