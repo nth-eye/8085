@@ -22,13 +22,6 @@ int main(int argc, char *argv[])
     auto settings = std::make_unique<Settings>();
     auto simulator = std::make_unique<Simulator>();
 
-//    qmlRegisterUncreatableMetaObject(
-//        enums::staticMetaObject,
-//        "backend.enums",
-//        1, 0,
-//        "Enums",
-//        "Error: only enums"
-//    );
     qmlRegisterType<DocHandler>("backend.doc_handler", 1, 0, "DocHandler");
     qmlRegisterSingletonInstance("backend.settings", 1, 0, "Settings", settings.get());
     qmlRegisterSingletonInstance("backend.simulator", 1, 0, "Simulator", simulator.get());
