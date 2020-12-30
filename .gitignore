@@ -2,4 +2,3 @@
 build
 test
 CMakeLists.txt.user
-example_bubble_sort_*

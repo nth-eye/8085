@@ -41,8 +41,9 @@ SplitView {
             Button {
                 width: 200
                 height: 100
+                anchors.centerIn: parent
                 text: "assemble demo"
-                onClicked: Simulator.assemble(":/example_bubble_sort.asm")
+                onClicked: Simulator.assemble("../8085-qml/example_bubble_sort.asm")
             }
         }
         Rectangle {

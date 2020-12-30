@@ -1,0 +1,43 @@
+	ORG 2000H 
+	DB 49H, 0AH, 9FH, 1FH, 00H, 26H, 0CDH, 37H, 9EH, 0F1H, 49H, 36H 
+	
+	ORG 1000H 
+	
+START: 
+	LXI H, 2000H 
+	LXI D, 2018H 
+	MVI C, 0CH 
+COPY: 
+	MOV A, M 
+	STAX D 
+	INX H 
+	INX D 
+	DCR C 
+	JNZ COPY 
+	MVI E, 0BH 
+O_LOOP: 
+	LXI H, 2023H 
+	MOV C, E 
+	MVI D, 0 
+I_LOOP: 
+	MOV A, M 
+	DCX H 
+	CMP M 
+	JNC CHECK 
+SWAP: 
+	MVI D, 1 
+	MOV B, M 
+	MOV M, A 
+	INX H 
+	MOV M, B 
+	DCX H 
+CHECK: 
+	DCR C 
+	JNZ I_LOOP 
+	DCR E 
+	XRA A 
+	CMP D 
+	JNZ O_LOOP 
+END: 
+	HLT 
+	

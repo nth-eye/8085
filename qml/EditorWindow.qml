@@ -93,7 +93,7 @@ Item {
         cursorPosition: text_edit.cursorPosition
         selectionStart: text_edit.selectionStart
         selectionEnd: text_edit.selectionEnd
-        // Component.onCompleted: document.load("qrc:/example_bubble_sort.asm")
+        Component.onCompleted: document.load("qrc:/example_bubble_sort.asm")
         onLoaded: {
             text_edit.text = text
         }
