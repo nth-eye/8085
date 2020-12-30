@@ -3,32 +3,18 @@
 
 #pragma once
 
-namespace intel_8085 {
-
 using Word = uint16_t;
 using Byte = uint8_t;
 using Pin = bool;
 
-union RegPair {
+union Reg {
+    operator Byte() { return byte; }
 
-    RegPair() = default;
-    RegPair(Word word_) { word = word_; }
+    Reg& operator=(const Byte byte_) { byte = byte_; return *this; }
+    Reg& operator+=(const Byte byte_) { byte += byte_; return *this; }
+    Reg& operator-=(const Byte byte_) { byte -= byte_; return *this; }
 
-    explicit operator Word() { return word; }
-
-    Word& operator++() { ++word; return word; }
-    Word& operator--() { --word; return word; }
-    Word operator++(int) { RegPair tmp(*this); operator++(); return tmp.word; }
-    Word operator--(int) { RegPair tmp(*this); operator--(); return tmp.word; }
-
-    RegPair& operator+=(const RegPair &reg) { word += reg.word; return *this; }
-    RegPair& operator-=(const RegPair &reg) { word -= reg.word; return *this; }
-
-    Word word;
-    struct {
-        Byte _0;
-        Byte _1;
-    };
+    Byte byte;
     struct {
         Byte
         CY : 1, // Carry flag
@@ -39,37 +25,6 @@ union RegPair {
         D5 : 1, // D5
         Z  : 1, // Zero flag
         S  : 1; // Sign flag
-        Byte A; // A register alias, same as _1
-    };
-};
-
-union Bus {
-    Word word;
-    struct {
-        union {
-            Byte
-            D0 : 1, // Carry flag
-            D1 : 1, // D1
-            D2 : 1, // Parity flag
-            D3 : 1, // D3
-            D4 : 1, // Auxiliary Carry
-            D5 : 1, // D5
-            D6 : 1, // Zero flag
-            D7 : 1; // Sign flag
-            Byte data_bus;
-        };
-        union {
-            Byte
-            A8 : 1, // Carry flag
-            A9 : 1, // D1
-            A10 : 1, // Parity flag
-            A11 : 1, // D3
-            A12 : 1, // Auxiliary Carry
-            A13 : 1, // D5
-            A14 : 1, // Zero flag
-            A15 : 1; // Sign flag
-            Byte addr_bus;
-        };
     };
 };
 
@@ -82,6 +37,40 @@ enum Cycle : Byte {
     IOW,    // I/O write
     INA,    // Acknowledge of INTR
     BI      // Bus idle
+};
+
+// All directives (pseudo opcodes)
+enum Directive {
+    // EQU, SET,
+    DB, DW,
+    DS,
+    // IF, ELSE, ENDIF,
+    // END,
+    // EOT,
+    // ASEG, DSEG, CSEG,
+    ORG,
+    // PUBLIC, EXTRN, NAME, STKLN,
+    // MACRO, ENDM, LOCAL
+    // LIB, LINK, LOCATE
+    // STACK, MEMORY
+    // REPT, IRP, IRPC, EXITM
+};
+
+enum OperandType {
+    NO_OPERAND,
+    BD,
+    BDH_SP,
+    BDH_PSW,
+    BCDEHLMA,
+    IMMEDIATE,
+    ADDRESS,
+    RESET_NUMBER
+};
+
+enum ByteType {
+    INSTRUCTION,
+    OPERAND,
+    DATABYTE
 };
 
 // All machine codes
@@ -387,7 +376,38 @@ enum Opcode : Byte {
     CMP_A,
 };
 
+struct Instruction {
+    Opcode      code = NOP;
+    OperandType op_1_t = NO_OPERAND;
+    OperandType op_2_t = NO_OPERAND;
+};
+
 constexpr Opcode  operator+(Opcode code, int v)     { return Opcode(int(code) + v); }
 constexpr Opcode& operator+=(Opcode &code, int v)   { return code = code + v; }
 
-} // namespace intel_8085
+#include <mutex>
+#include <sstream>
+#include <iostream>
+
+// Synchronized thread-safe cout before C++20.
+class sync_out : public std::ostringstream {
+    static std::mutex mut;
+    std::ostream &os;
+public:
+    sync_out(std::ostream &os_) : os(os_)
+    {
+        // imbue(os.getloc());
+        // precision(os.precision());
+        // width(os.width());
+        // setf(std::ios::fixed, std::ios::floatfield);
+    }
+    ~sync_out()
+    {
+        std::lock_guard guard(mut);
+        std::cout << this->str() << std::endl;
+    }
+};
+inline std::mutex sync_out::mut{};
+
+#define serr sync_out(std::cerr)
+#define sout sync_out(std::cout)

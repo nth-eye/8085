@@ -5,50 +5,15 @@
 #include <fstream>
 
 #include "types.h"
-#include "misc.h"
-#include "memory.h"
 
 #pragma once
 
-namespace intel_8085 {
-
-// All directives (pseudo opcodes)
-enum Directive {
-    // EQU, SET,
-    DB, DW,
-    DS,
-    // IF, ELSE, ENDIF, 
-    // END, 
-    // EOT,
-    // ASEG, DSEG, CSEG, 
-    ORG,
-    // PUBLIC, EXTRN, NAME, STKLN,
-    // MACRO, ENDM, LOCAL
-    // LIB, LINK, LOCATE
-    // STACK, MEMORY
-    // REPT, IRP, IRPC, EXITM
-};
-
-enum OperandType {
-    NO_OPERAND,
-    BD,
-    BDH_SP,
-    BDH_PSW,
-    BCDEHLMA,
-    IMMEDIATE,
-    ADDRESS,
-    RESET_NUMBER
-};
-
 struct Assembler {
 
-    Assembler(Memory &mem_) : mem(mem_) {}
+    Assembler(std::unordered_map<ByteType, std::map<Word, Byte>> &asm_codes_) : asm_codes(asm_codes_) {}
 
-    void assemble(const std::string &file);
-    void preprocess();
-    void compile();
-    void link();
-
+    void preprocess(const std::string &, const std::string &);
+    void compile(const std::string &, const std::string &);
 private:
     void shift_opcode(Opcode&, int, char);
     void parse_dir(std::istringstream&, Directive);
@@ -60,20 +25,12 @@ private:
     bool legal_label(std::string&);
     int operand_to_int(std::string);
 
-
-    std::map<std::string, std::string>  sym_table;
+//    std::map<std::string, std::string>  sym_table;
     std::map<std::string, Word>         labels;
     std::map<std::string, Word>         maybe_labels;
-    std::map<Word, Byte>                asm_codes;
 
-    std::string filename;
-    std::string preproc_filename;
-    std::string exec_filename;
-
-    Memory  &mem;
+    std::unordered_map<ByteType, std::map<Word, Byte>> &asm_codes;
 
     size_t  line_num = 0;
     Word    loc_cnt = 0;
 };
-
-} // namespace intel_8085

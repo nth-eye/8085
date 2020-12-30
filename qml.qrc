@@ -1,0 +1,23 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/main.qml</file>
+        <file>qml/Editor.qml</file>
+        <file>qml/Debugger.qml</file>
+        <file>qml/SideBar.qml</file>
+        <file>qml/MyButton.qml</file>
+        <file>qml/MyMenu.qml</file>
+        <file>qml/MyMenuBar.qml</file>
+        <file>qml/Colors.qml</file>
+        <file>qml/img/icon_asm.png</file>
+        <file>qml/img/icon_bin.png</file>
+        <file>qml/img/icon_bug.png</file>
+        <file>qml/MyMenuSeparator.qml</file>
+        <file>qml/EditorWindow.qml</file>
+        <file>example_bubble_sort.asm</file>
+        <file>qml/SettingsWindow.qml</file>
+        <file>qml/img/icon_close.png</file>
+        <file>qml/img/icon_close_2.png</file>
+        <file>qml/Memory.qml</file>
+        <file>qml/ValueBox.qml</file>
+    </qresource>
+</RCC>

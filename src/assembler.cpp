@@ -1,17 +1,10 @@
 #include <regex>
 #include <iomanip>
+#include <QDebug>
 		
 #include "assembler.h"
 
-namespace intel_8085 {
-
 namespace {
-
-struct Instruction {
-    Opcode      code = NOP;
-    OperandType op_1_t = NO_OPERAND;
-    OperandType op_2_t = NO_OPERAND;
-};
 
 const std::string STR_BD = "B D";
 const std::string STR_BDHSP = "B D H SP";
@@ -99,35 +92,23 @@ const std::unordered_map<std::string, Instruction> INS_MAP = {
     {"XTHL",    {XTHL}}
 };
 
+const std::unordered_map<Opcode, std::string> OPCODE_MAP = {
+    {NOP,   "nop"},
+    {}
+};
+
 } // namespace
 
-void Assembler::assemble(const std::string &file)
-{
-    filename = file;
-    preproc_filename = filename;
-
-    size_t lastindex = filename.find_last_of("."); 
-    if (lastindex != std::string::npos) 
-        preproc_filename = preproc_filename.substr(0, lastindex);
-
-    exec_filename = preproc_filename;
-    preproc_filename += "_preproc.asm";
-    exec_filename += "_exec.txt";
-
-    preprocess();
-    compile();
-}
-
-void Assembler::preprocess()
+void Assembler::preprocess(const std::string &src_file, const std::string &preproc_file)
 {
     std::ifstream ifs;
     std::ofstream ofs;
 
-    ifs.open(filename);
-    ofs.open(preproc_filename);
+    ifs.open(src_file);
+    ofs.open(preproc_file);
 
     if (!ifs.is_open()) {
-        sout << "Failed to open " << filename;
+        sout << "Failed to open " << src_file;
         return;
     }
 
@@ -141,7 +122,7 @@ void Assembler::preprocess()
             continue;
 
         std::istringstream ss(line);
-        std::string word, ins, expr;
+        std::string word;
 
         if (line.find(':') == std::string::npos) //line.back() != ':')
             ofs << '\t';
@@ -162,16 +143,16 @@ void Assembler::preprocess()
     }
 }
 
-void Assembler::compile()
+void Assembler::compile(const std::string &preproc_file, const std::string &exec_file)
 {
     std::ifstream ifs;
     std::ofstream ofs;
 
-    ifs.open(preproc_filename);
-    ofs.open(exec_filename);
+    ifs.open(preproc_file);
+    ofs.open(exec_file);
 
     if (!ifs.is_open()) {
-        sout << "Failed to open " << preproc_filename;
+        sout << "Failed to open " << preproc_file;
         return;
     }
 
@@ -210,8 +191,8 @@ void Assembler::compile()
     // Replace all possible labels with confirmed
     for (const auto &[lbl, mem_ptr] : maybe_labels) {
         if (labels.find(lbl) != labels.end()) {
-            asm_codes[mem_ptr] = labels[lbl] & 0xFF;
-            asm_codes[mem_ptr + 1] = labels[lbl] >> 8;
+            asm_codes[OPERAND][mem_ptr] = labels[lbl] & 0xFF;
+            asm_codes[OPERAND][mem_ptr + 1] = labels[lbl] >> 8;
         } else {
             sout << "Unrecognized label " << lbl;
         }
@@ -219,8 +200,8 @@ void Assembler::compile()
 
     sout << "\nExec binary size: " << asm_codes.size();
 
-    for (auto [addr, byte] : asm_codes)
-        ofs << std::hex << std::setfill('0') << std::setw(4) << addr << '\t' << std::setw(2) << int(byte) << '\r';
+//    for (auto [addr, byte] : asm_codes)
+//        ofs << std::hex << std::setfill('0') << std::setw(4) << addr << '\t' << std::setw(2) << int(byte) << '\r';
 }
 
 void Assembler::shift_opcode(Opcode &code, int shift, char op)
@@ -259,7 +240,7 @@ void Assembler::parse_dir(std::istringstream &iss, Directive dir)
                 if (op.back() == ',')
                     op.pop_back();
                 if (legal_imm_data(op)) {
-                    asm_codes[loc_cnt] = operand_to_int(op);
+                    asm_codes[DATABYTE][loc_cnt] = operand_to_int(op);
                     ++loc_cnt;
                 } else {
                     sout << "Illegal operand at line " << line_num;
@@ -271,8 +252,8 @@ void Assembler::parse_dir(std::istringstream &iss, Directive dir)
             if (legal_address(op)) {
                 Word data = operand_to_int(op);
 
-                asm_codes[loc_cnt++] = data & 0xFF;
-                asm_codes[loc_cnt++] = data >> 8;
+                asm_codes[DATABYTE][loc_cnt++] = data & 0xFF;
+                asm_codes[DATABYTE][loc_cnt++] = data >> 8;
             } else {
                 sout << "Illegal operand at line " << line_num;
             }
@@ -366,7 +347,7 @@ void Assembler::parse_ins(std::istringstream &iss, std::string &ins_word)
 
         default: break;
     }
-    asm_codes[loc_cnt] = ins.code;
+    asm_codes[INSTRUCTION][loc_cnt] = ins.code;
 
     ++loc_cnt;
 
@@ -378,7 +359,7 @@ void Assembler::store_operand(OperandType type, std::string &op)
 {
     if (type == IMMEDIATE) {
         Byte data = operand_to_int(op);
-        asm_codes[loc_cnt] = data;
+        asm_codes[OPERAND][loc_cnt] = data;
         ++loc_cnt;
     } else if (type == ADDRESS) {
 
@@ -396,9 +377,9 @@ void Assembler::store_operand(OperandType type, std::string &op)
             data = operand_to_int(op);
         }
 
-        asm_codes[loc_cnt] = data & 0xFF;
+        asm_codes[OPERAND][loc_cnt] = data & 0xFF;
         ++loc_cnt;
-        asm_codes[loc_cnt] = data >> 8;
+        asm_codes[OPERAND][loc_cnt] = data >> 8;
         ++loc_cnt;
     }
 }
@@ -482,7 +463,7 @@ bool Assembler::legal_label(std::string &lbl)
 
     return lbl.find_first_not_of("0123456789?@ABCDEFGHIJKLMNOPQRSTUVWXYZ") == std::string::npos;
 
-    return std::regex_match(lbl, std::regex("[0-9?@A-Z]+"));
+    // return std::regex_match(lbl, std::regex("[0-9?@A-Z]+"));
 }
 
 int Assembler::operand_to_int(std::string op)
@@ -505,5 +486,3 @@ int Assembler::operand_to_int(std::string op)
     }
     return val;
 }
-
-} // namespace intel_8085

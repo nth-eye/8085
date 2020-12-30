@@ -1,15 +1,54 @@
-#include "cpu.h"
-#include "assembler.h"
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QSettings>
+#include <QStringListModel>
+#include <QQmlContext>
 
-using namespace intel_8085;
+#include "doc_handler.h"
+#include "settings.h"
+#include "simulator.h"
 
-int main(int, char**) 
+int main(int argc, char *argv[])
 {
-    Memory      mem;
-    CPU         cpu(mem);
-    Assembler   assembler(mem);
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
-    cpu.reset();
+    QGuiApplication app(argc, argv);
 
-    assembler.assemble("../example_bubble_sort.asm");
+    app.setOrganizationName("nth-eye");
+    app.setOrganizationDomain("nth-eye");
+
+    Highlighter::init();
+
+    auto settings = std::make_unique<Settings>();
+    auto simulator = std::make_unique<Simulator>();
+
+//    qmlRegisterUncreatableMetaObject(
+//        enums::staticMetaObject,
+//        "backend.enums",
+//        1, 0,
+//        "Enums",
+//        "Error: only enums"
+//    );
+    qmlRegisterType<DocHandler>("backend.doc_handler", 1, 0, "DocHandler");
+    qmlRegisterSingletonInstance("backend.settings", 1, 0, "Settings", settings.get());
+    qmlRegisterSingletonInstance("backend.simulator", 1, 0, "Simulator", simulator.get());
+
+    QStringListModel list_model;
+    list_model.setStringList(Settings::settings_list);
+
+    QQmlApplicationEngine engine;
+
+    engine.rootContext()->setContextProperty("list_model", &list_model);
+
+    const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+                     &app, [url](QObject *obj, const QUrl &objUrl) {
+        if (!obj && url == objUrl)
+            QCoreApplication::exit(-1);
+    }, Qt::QueuedConnection);
+    engine.load(url);
+
+    // settings.get()->reset();
+
+    return app.exec();
 }

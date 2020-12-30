@@ -1,37 +1,80 @@
-#include <array>
+#ifndef MEMORY_H
+#define MEMORY_H
+
+#include <QAbstractTableModel>
+#include <QAbstractListModel>
 
 #include "types.h"
-#include "misc.h"
 
-#pragma once
+using Memory = std::array<Byte, 0x10000>;
 
-namespace intel_8085 {
+class StackModel : public QAbstractListModel {
+    Q_OBJECT
+public:
+    explicit StackModel(Memory &mem_, QObject *parent = nullptr);
 
-struct Memory {
-    Byte&   operator[](size_t idx)                { return mem[idx]; }
-    Memory& operator()(size_t idx)                { ptr = idx; return *this; }
-    Memory& operator= (const std::initializer_list<Byte> &other) 
-    {
-        if (other.size() > mem.size() - ptr) {
-            sout 
-            << "Instructions require more memory than available from address: 0x" 
-            << std::hex << ptr;
-        }
-        for (auto it : other)
-            mem[ptr++] = it;
+    enum {
+        AddressRole = Qt::UserRole,
+        ByteRole
+    };
 
-        return *this;
-    }
-    void clear()
-    {
-        for (size_t i = 0; i < mem.size(); ++i)
-            mem[i] = 0;
-    }
-    Byte* data()        { return mem.data(); }
-    size_t size() const { return mem.size(); }
+    // Basic functionality:
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+
+    // Editable:
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    virtual QHash<int, QByteArray> roleNames() const override;
 private:
-    size_t ptr = 0;
-    std::array<Byte, 0xFFFF+1> mem = {};
+    Memory &mem;
 };
 
-} // namespace intel_8085
+
+class MemoryModel : public QAbstractTableModel {
+    Q_OBJECT
+public:
+    explicit MemoryModel(Memory &mem_, QObject *parent = nullptr);
+
+    enum {
+        OffsetRole = Qt::UserRole,
+        ByteRole,
+        CharRole
+    };
+
+    // Basic functionality:
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+
+    // Editable:
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    virtual QHash<int, QByteArray> roleNames() const override;
+private:
+    Memory &mem;
+};
+
+//class MnemonicModel : public QAbstractListModel {
+//    Q_OBJECT
+//public:
+//    explicit MnemonicModel(Memory &mem_, QObject *parent = nullptr);
+
+//    enum {
+//        AddressRole = Qt::UserRole,
+//        MnemonicRole
+//    };
+
+//    // Basic functionality:
+//    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+//    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+
+//    // Editable:
+//    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+//    Qt::ItemFlags flags(const QModelIndex &index) const override;
+//    virtual QHash<int, QByteArray> roleNames() const override;
+//private:
+//    Memory &mem;
+//};
+
+#endif // MEMORY_H
