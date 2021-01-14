@@ -17,7 +17,6 @@
         <file>qml/SettingsWindow.qml</file>
         <file>qml/img/icon_close.png</file>
         <file>qml/img/icon_close_2.png</file>
-        <file>qml/Memory.qml</file>
         <file>qml/ValueBox.qml</file>
         <file>example_bubble_sort_preproc.asm</file>
         <file>example_bubble_sort_exec.txt</file>

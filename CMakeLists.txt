@@ -31,7 +31,7 @@ include_directories(. qml include)
 #    endif()
 #endif()
 
-find_package(QT NAMES Qt5 COMPONENTS Core Quick REQUIRED)
+find_package(QT NAMES Qt6 COMPONENTS Core Quick REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
 
 if(ANDROID)

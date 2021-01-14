@@ -5,9 +5,7 @@
 #include <QFileSelector>
 #include <QQmlFile>
 #include <QQmlFileSelector>
-#include <QQuickTextDocument>
 #include <QTextCharFormat>
-#include <QTextCodec>
 #include <QTextDocument>
 #include <QDebug>
 
@@ -150,11 +148,11 @@ void DocHandler::load(const QUrl &url)
         QFile file(fileName);
         if (file.open(QFile::ReadOnly)) {
             QByteArray data = file.readAll();
-            QTextCodec *codec = QTextCodec::codecForUtfText(data);// QTextCodec::codecForHtml(data);
+            // QTextCodec *codec = QTextCodec::codecForUtfText(data);
             if (QTextDocument *doc = text_document())
                 doc->setModified(false);
 
-            emit loaded(codec->toUnicode(data));
+            emit loaded(/*codec->toUnicode(*/data/*)*/);
             reset();
         }
     }
@@ -226,14 +224,6 @@ QTextDocument *DocHandler::text_document() const
 
     return document->textDocument();
 }
-
-//void DocumentHandler::mergeFormatOnWordOrSelection(const QTextCharFormat &format)
-//{
-//    QTextCursor cursor = textCursor();
-//    if (!cursor.hasSelection())
-//        cursor.select(QTextCursor::WordUnderCursor);
-//    cursor.mergeCharFormat(format);
-//}
 
 //bool DocumentHandler::modified() const
 //{

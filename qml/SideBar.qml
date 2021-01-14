@@ -1,6 +1,6 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Rectangle {
     property alias idx: list.currentIndex
@@ -12,11 +12,11 @@ Rectangle {
     ListModel {
         id: model
         ListElement {
-            src: "img/icon_asm.png"
+            src: "qrc:/qml/img/icon_asm.png"
             chk: true
         }
         ListElement {
-            src: "img/icon_bug.png"
+            src: "qrc:/qml/img/icon_bug.png"
             chk: false
         }
     }

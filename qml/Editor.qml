@@ -1,7 +1,7 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
-import QtQuick.Dialogs 1.3
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import Qt.labs.platform 1.1
 
 import backend.doc_handler 1.0
 
@@ -55,7 +55,7 @@ SplitView {
                     height: 26
                     Button {
                         anchors.fill: parent
-                        icon.source: "img/icon_close_2.png"
+                        icon.source: "qrc:/qml/img/icon_close_2.png"
                         icon.color: tab_button.checked ? colors.light_4 : colors.light_1
                         icon.width: 64
                         icon.height: 64
@@ -94,7 +94,7 @@ SplitView {
             color: colors.dark_1
             Layout.fillWidth: true
             height: bar.height
-            visible: bar.currentIndex != -1
+            visible: bar.currentIndex !== -1
             TabBar {
                 id: bar
                 background: Rectangle {

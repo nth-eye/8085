@@ -1,17 +1,12 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
-#include <QFont>
 #include <QObject>
-#include <QTextCursor>
 #include <QUrl>
+#include <QQuickTextDocument>
 
 #include "highlighter.h"
 
-QT_BEGIN_NAMESPACE
-class QTextDocument;
-class QQuickTextDocument;
-QT_END_NAMESPACE
 
 class DocHandler : public QObject
 {

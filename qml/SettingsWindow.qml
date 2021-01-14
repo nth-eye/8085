@@ -1,9 +1,9 @@
-import QtQuick 2.0
-import QtQuick.Window 2.15
-import QtQuick.Layouts 1.15
-import QtQuick.Dialogs 1.3
-import QtQuick.Controls 2.15
-import QtQml.Models 2.15
+import QtQuick
+import QtQuick.Window
+import QtQuick.Layouts
+import QtQuick.Controls
+import QtQml.Models
+import Qt.labs.platform 1.1 as Platform
 
 import backend.settings 1.0
 
@@ -37,7 +37,7 @@ Dialog {
             list.itemAtIndex(i).color = Settings.value(list.itemAtIndex(i).text)
     }
 
-    ColorDialog {
+    Platform.ColorDialog {
         property string selected_setting
 
         id: color_dialog

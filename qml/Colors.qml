@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick
 
 Item {
     property color dark_1: "#16161b"

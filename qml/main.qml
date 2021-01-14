@@ -1,10 +1,9 @@
-﻿import QtQuick 2.15
-import QtQuick.Window 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Dialogs 1.3
-import QtQuick.Layouts 1.15
-import QtQuick.Controls.Styles 1.4
+﻿import QtQml
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 // import Qt.labs.settings 1.0
+import Qt.labs.platform 1.1
 
 import backend.settings 1.0
 
@@ -87,7 +86,7 @@ ApplicationWindow {
     FileDialog {
          id: open_dialog
          nameFilters: ["8085 files (*.a85 *.asm)", "Text files (*.txt)"]
-         folder: shortcuts.home
+         folder: StandardPaths.writableLocation(StandardPaths.HomeLocation)
          onAccepted: {
              editor.add_tab(basename(fileUrl.toString()));
              editor.active_doc().load(fileUrl);
@@ -97,7 +96,7 @@ ApplicationWindow {
     FileDialog {
         id: save_dialog
         nameFilters: ["8085 files (*.a85 *.asm)", "Text files (*.txt)", "All files (*)"]
-        selectExisting: false
+        // selectExisting: false
         onAccepted: document.save(file)
     }
 
@@ -105,10 +104,10 @@ ApplicationWindow {
         id : exit_dialog
         title: qsTr("Exit?")
         text: qsTr("The file has been modified. Exit anyway?")
-        icon: StandardIcon.Question
-        standardButtons: MessageDialog.Yes | MessageDialog.No
-        onYes: Qt.quit()
-        onNo: console.log("didn't copy")
+        // icon: StandardIcon.Question
+        buttons: MessageDialog.Yes | MessageDialog.No
+        onYesClicked: Qt.quit()
+        onNoClicked: console.log("didn't copy")
     }
 
     RowLayout {

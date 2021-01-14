@@ -89,7 +89,7 @@ QVariant MemoryModel::data(const QModelIndex &index, int role) const
     switch (role) {
         case OffsetRole: return QStringLiteral("%1").arg(idx, 4, 16, QLatin1Char('0')).toUpper();
         case ByteRole: return QStringLiteral("%1").arg(val, 2, 16, QLatin1Char('0')).toUpper();
-        case CharRole: return QChar::isPrint(val) ? QString(val) : QString('.');
+        case CharRole: return QChar::isPrint(val) ? QString(QChar(val)) : QString('.');
         default: return QVariant();
     }
 }
